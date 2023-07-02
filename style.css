@@ -12,7 +12,7 @@
     margin: 1px;
 }
 
-.button-item:nth-child(4n) {
+.button-item:nth-child(8n) {
     margin-right: 10px;
     /* Add larger margin to every fourth button */
 }

@@ -1,10 +1,13 @@
 use yew::prelude::*;
+use gloo::console;
+use std::mem;
 mod bits;
 use bits::Bits;
+use web_sys::{ HtmlInputElement};
 
 enum Msg {
     FlipBit(usize),
-    SetSize(usize),
+    SetDataFromStrRadix(String, u32),
 }
 
 struct App {
@@ -27,8 +30,19 @@ impl Component for App {
                 self.bits.flip_bit(index);
                 true
             }
-            Msg::SetSize(size) => {
-                self.bits.set_size(size);
+            Msg::SetDataFromStrRadix(input, radix) => {
+                let src = input.strip_prefix("0x").unwrap_or(
+                    input.strip_prefix("0b").unwrap_or(
+                        &input));
+                self.bits.data = match src {
+                    "" => 0,
+                    src => {
+                        match bits::DataType::from_str_radix(src, radix) {
+                            Ok(parsed) => parsed,
+                            Err(_) => self.bits.data
+                        }
+                    }
+                };
                 true
             }
         }
@@ -38,7 +52,7 @@ impl Component for App {
         html! {
             <div>
                 <div class="button-container">
-                    { (0..self.bits.size).rev().map(|index| {
+                    { (0..mem::size_of::<bits::DataType>() * 8).rev().map(|index| {
                         let bit_value = self.bits.get_bit(index);
                         let button_class = if bit_value { "button-on" } else { "button-off" };
                         html! {
@@ -52,19 +66,40 @@ impl Component for App {
                     }).collect::<Html>() }
                 </div>
                 <div class="output-container">
-                    <div class="output-item">
-                        <span>{"Binary:"}</span>
-                        <p>{self.bits.to_bit_string()}</p>
-                    </div>
-                    <div class="output-item">
-                        <span>{"Hex:   "}</span>
-                        <p>{self.bits.to_hex_string()}</p>
-                    </div>
-                    <div class="output-item">
-                        <span>{"Decimal:"}</span>
-                        <p>{self.bits.to_dec_string()}</p>
-                    </div>
+                <div class="output-item">
+                    <span>{"Binary: "}</span>
+                    <input
+                        type="text"
+                        value={self.bits.to_radix_string(2)}
+                        oninput={ctx.link().callback(|e: InputEvent| {
+                            let input: HtmlInputElement = e.target_unchecked_into();
+                            Msg::SetDataFromStrRadix(input.value(), 2)
+                        })}
+                    />
                 </div>
+                <div class="output-item">
+                    <span>{"Hex: "}</span>
+                    <input
+                        type="text"
+                        value={self.bits.to_radix_string(16)}
+                        oninput={ctx.link().callback(|e: InputEvent| {
+                            let input: HtmlInputElement = e.target_unchecked_into();
+                            Msg::SetDataFromStrRadix(input.value(), 16)
+                        })}
+                    />
+                </div>
+                <div class="output-item">
+                    <span>{"Decimal: "}</span>
+                    <input
+                        type="text"
+                        value={self.bits.to_radix_string(10)}
+                        oninput={ctx.link().callback(|e: InputEvent| {
+                            let input: HtmlInputElement = e.target_unchecked_into();
+                            Msg::SetDataFromStrRadix(input.value(), 10)
+                        })}
+                    />
+                </div>
+            </div>
             </div>
         }
     }
