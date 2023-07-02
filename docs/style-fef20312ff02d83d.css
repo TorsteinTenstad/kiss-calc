@@ -12,11 +12,6 @@
     margin: 1px;
 }
 
-.button-item:nth-child(8n) {
-    margin-right: 10px;
-    /* Add larger margin to every fourth button */
-}
-
 .label {
     margin-bottom: 2px;
 }
@@ -84,4 +79,17 @@ body {
 
 .output-item p {
     margin: 0;
+}
+
+.output-item input[type="text"] {
+    width: 388px;
+    /* Set the width to 388px */
+}
+
+/* Media Queries */
+@media (min-width: 1020px) {
+    .button-item:nth-child(8n) {
+        margin-right: 10px;
+        /* Add larger margin to every fourth button */
+    }
 }
