@@ -1,33 +1,74 @@
 use yew::prelude::*;
+mod bits;
+use bits::Bits;
 
-struct Model {
-    value: i64
+enum Msg {
+    FlipBit(usize),
+    SetSize(usize),
 }
 
-#[function_component(App)]
-fn app() -> Html {
-    let state = use_state(|| Model {
-        value: 0
-    });
+struct App {
+    pub bits: Bits,
+}
 
-    let onclick = {
-        let state = state.clone();
+impl Component for App {
+    type Message = Msg;
+    type Properties = ();
 
-        Callback::from(move |_| {
-            state.set(Model {
-                value: state.value + 1
-            })
-        })
-    };
-
-    html! {
-        <div>
-            <button {onclick}>
-                { "+1" }
-            </button>
-            <p>{ state.value }</p>
-        </div>
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self {
+            bits: Bits::new(),
+        }
     }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::FlipBit(index) => {
+                self.bits.flip_bit(index);
+                true
+            }
+            Msg::SetSize(size) => {
+                self.bits.set_size(size);
+                true
+            }
+        }
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! {
+            <div>
+                <div class="button-container">
+                    { (0..self.bits.size).rev().map(|index| {
+                        let bit_value = self.bits.get_bit(index);
+                        let button_class = if bit_value { "button-on" } else { "button-off" };
+                        html! {
+                            <div class="button-item">
+                                <label>{ format!("{:02}", index) }</label>
+                                <button class={button_class} onclick={ctx.link().callback(move |_| Msg::FlipBit(index))}>
+                                    { bit_value as i32 }
+                                </button>
+                            </div>
+                        }
+                    }).collect::<Html>() }
+                </div>
+                <div class="output-container">
+                    <div class="output-item">
+                        <span>{"Binary:"}</span>
+                        <p>{self.bits.to_bit_string()}</p>
+                    </div>
+                    <div class="output-item">
+                        <span>{"Hex:   "}</span>
+                        <p>{self.bits.to_hex_string()}</p>
+                    </div>
+                    <div class="output-item">
+                        <span>{"Decimal:"}</span>
+                        <p>{self.bits.to_dec_string()}</p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    
 }
 
 fn main() {
