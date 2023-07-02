@@ -1,8 +1,35 @@
 <!DOCTYPE html><html><head>
     <meta charset="utf-8">
     <title>Yew App</title>
-    <link rel="stylesheet" href="/style-65435546778dece0.css">
+    <link rel="stylesheet" href="/https://torsteintenstad.github.io/kiss-calc/style-65435546778dece0.css">
 
-<link rel="preload" href="/kiss-calc-8bc212fd26f948c8_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/kiss-calc-8bc212fd26f948c8.js"></head>
-<body><script type="module">import init from '/kiss-calc-8bc212fd26f948c8.js';init('/kiss-calc-8bc212fd26f948c8_bg.wasm');</script></body></html>
+<link rel="preload" href="/https://torsteintenstad.github.io/kiss-calc/kiss-calc-8bc212fd26f948c8_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/https://torsteintenstad.github.io/kiss-calc/kiss-calc-8bc212fd26f948c8.js"></head>
+<body><script type="module">import init from '/https://torsteintenstad.github.io/kiss-calc/kiss-calc-8bc212fd26f948c8.js';init('/https://torsteintenstad.github.io/kiss-calc/kiss-calc-8bc212fd26f948c8_bg.wasm');</script><script>(function () {
+    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = protocol + '//' + window.location.host + '/_trunk/ws';
+    var poll_interval = 5000;
+    var reload_upon_connect = () => {
+        window.setTimeout(
+            () => {
+                // when we successfully reconnect, we'll force a
+                // reload (since we presumably lost connection to
+                // trunk due to it being killed, so it will have
+                // rebuilt on restart)
+                var ws = new WebSocket(url);
+                ws.onopen = () => window.location.reload();
+                ws.onclose = reload_upon_connect;
+            },
+            poll_interval);
+    };
+
+    var ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.reload) {
+            window.location.reload();
+        }
+    };
+    ws.onclose = reload_upon_connect;
+})()
+</script></body></html>
