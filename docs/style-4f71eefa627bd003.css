@@ -1,15 +1,20 @@
-.button-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    /* Align buttons to the left */
-}
-
 .button-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: 1px;
+}
+
+.bytes {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.byte {
+    display: flex;
+    flex-direction: row;
+    margin-right: 0.5em;
 }
 
 .label {
@@ -84,12 +89,4 @@ body {
 .output-item input[type="text"] {
     width: 255px;
     /* Set the width to 388px */
-}
-
-/* Media Queries */
-@media (min-width: 1020px) {
-    .button-item:nth-child(8n) {
-        margin-right: 10px;
-        /* Add larger margin to every fourth button */
-    }
 }

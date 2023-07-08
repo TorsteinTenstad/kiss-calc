@@ -1,9 +1,10 @@
-use yew::prelude::*;
 use gloo::console;
 use std::mem;
+use yew::prelude::*;
 mod bits;
 use bits::Bits;
-use web_sys::{ HtmlInputElement};
+use itertools::Itertools;
+use web_sys::HtmlInputElement;
 
 enum Msg {
     FlipBit(usize),
@@ -19,9 +20,7 @@ impl Component for App {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Self {
-            bits: Bits::new(),
-        }
+        Self { bits: Bits::new() }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -31,17 +30,15 @@ impl Component for App {
                 true
             }
             Msg::SetDataFromStrRadix(input, radix) => {
-                let src = input.strip_prefix("0x").unwrap_or(
-                    input.strip_prefix("0b").unwrap_or(
-                        &input));
+                let src = input
+                    .strip_prefix("0x")
+                    .unwrap_or(input.strip_prefix("0b").unwrap_or(&input));
                 self.bits.data = match src {
                     "" => 0,
-                    src => {
-                        match bits::DataType::from_str_radix(src, radix) {
-                            Ok(parsed) => parsed,
-                            Err(_) => self.bits.data
-                        }
-                    }
+                    src => match bits::DataType::from_str_radix(src, radix) {
+                        Ok(parsed) => parsed,
+                        Err(_) => self.bits.data,
+                    },
                 };
                 true
             }
@@ -51,7 +48,7 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
-                <div class="button-container">
+                <div class="bytes">
                     { (0..mem::size_of::<bits::DataType>() * 8).rev().map(|index| {
                         let bit_value = self.bits.get_bit(index);
                         let button_class = if bit_value { "button-on" } else { "button-off" };
@@ -63,7 +60,20 @@ impl Component for App {
                                 </button>
                             </div>
                         }
-                    }).collect::<Html>() }
+                    }).chunks(8).into_iter().map(|html_vec| {
+                        html!{
+                            <div class="byte">
+                                {html_vec.collect::<Html>() }
+                            </div>
+                        }
+                    }).chunks(2).into_iter().map(|html_vec| {
+                        html!{
+                            <div class="bytes">
+                                {html_vec.collect::<Html>() }
+                            </div>
+                        }
+                    })
+                    .collect::<Html>() }
                 </div>
                 <div class="output-container">
                 <div class="output-item">
@@ -103,7 +113,6 @@ impl Component for App {
             </div>
         }
     }
-    
 }
 
 fn main() {
